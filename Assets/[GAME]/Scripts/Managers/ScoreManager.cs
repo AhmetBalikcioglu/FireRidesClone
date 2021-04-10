@@ -32,7 +32,7 @@ public class ScoreManager : Singleton<ScoreManager>
     {
         if (_playerHighestPosZ > CharacterManager.Instance.Player.transform.position.z)
             return;
-        score += CharacterManager.Instance.Player.Rigidbody.velocity.z * Time.fixedDeltaTime * 0.1f;
+        score += CharacterManager.Instance.Player.transform.position.z - _playerHighestPosZ;
         _playerHighestPosZ = CharacterManager.Instance.Player.transform.position.z;
         EventManager.OnScoreUIUpdate.Invoke();
     }

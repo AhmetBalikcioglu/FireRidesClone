@@ -6,28 +6,29 @@ using UnityEngine;
 
 public class PlayerFollower : MonoBehaviour {
 
-    private Transform player;
-    private float zDifference;
-    private float yDifference;
+    private float _zDifference;
+    private float _yDifference;
 
-    public void SetPosition(Transform p)
+    private void OnEnable()
+    {
+        SetPosition();
+    }
+
+    public void SetPosition()
     {
         //Optimize this portion in an optimized way.
-        player = p;
-        zDifference = player.transform.position.z - transform.position.z;
-        yDifference = player.transform.position.y - transform.position.y;
+        _zDifference = CharacterManager.Instance.Player.transform.position.z - transform.position.z;
+        _yDifference = CharacterManager.Instance.Player.transform.position.y - transform.position.y;
     }
 
     int lastPassageIndex = -1;
     private void Update()
     {
-        if(player != null)
-        {
-            transform.position = new Vector3(transform.position.x, player.position.y - yDifference, player.position.z - zDifference);
-            //BlockCreator.GetSingleton().UpdateBlockPosition(passageIndex); //You may call update block position here to make it an infinite map.
-            //Hint:
-            //It must be called when it is really needed in a very optimized way.
-        }
+        transform.position = new Vector3(transform.position.x, CharacterManager.Instance.Player.transform.position.y - _yDifference, CharacterManager.Instance.Player.transform.position.z - _zDifference);
+        //BlockCreator.GetSingleton().UpdateBlockPosition(passageIndex); //You may call update block position here to make it an infinite map.
+        //Hint:
+        //It must be called when it is really needed in a very optimized way.
+        
     }
 
 }
