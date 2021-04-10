@@ -11,22 +11,27 @@ public class PlayerController : MonoBehaviour {
 
     [SerializeField] private bool _isFlying;
     public bool IsFlying { get { return _isFlying; } set { _isFlying = value; } }
-
-    private HingeJoint hJoint;
-    private LineRenderer lRenderer;
-    private Rigidbody playerRigidbody;
+    [SerializeField]
+    private float _forceAmount;
+    private bool _isConnected;
+    private float _timer;
+    private HingeJoint _hJoint;
+    private LineRenderer _lRenderer;
+    private Rigidbody _playerRigidbody;
 
     private void OnEnable()
     {
         if (Managers.Instance == null)
             return;
+        _isConnected = false;
+        _timer = 0.3f;
         EventManager.OnGameStart.AddListener(() => IsFlying = true);
         EventManager.OnLevelFinish.AddListener(() => IsFlying = false);
         EventManager.OnMouseDown.AddListener(PointerDown);
         EventManager.OnMouseUp.AddListener(PointerUp);
-        playerRigidbody = GetComponent<Rigidbody>();
-        hJoint = GetComponent<HingeJoint>();
-        lRenderer = GetComponent<LineRenderer>();
+        _playerRigidbody = GetComponent<Rigidbody>();
+        _hJoint = GetComponent<HingeJoint>();
+        _lRenderer = GetComponent<LineRenderer>();
     }
 
     private void OnDisable()
@@ -39,27 +44,47 @@ public class PlayerController : MonoBehaviour {
         EventManager.OnMouseUp.RemoveListener(PointerUp);
     }
 
-
     void Start ()
     {
         FindRelativePosForHingeJoint(new Vector3(0,10,0));
 	}
-	
+
+    private void FixedUpdate()
+    {
+        if (!_isConnected)
+            return;
+        //_playerRigidbody.velocity = Vector3.forward * _forceAmount * Time.deltaTime;
+
+        //_playerRigidbody.AddRelativeForce(Vector3.forward * _forceAmount * Time.deltaTime, ForceMode.Force);
+
+        if (_timer < 0.01f)
+            _timer += Time.deltaTime;
+        else
+        {
+            _playerRigidbody.AddRelativeForce(Vector3.forward * _forceAmount * Time.deltaTime,ForceMode.Force);
+            _timer = 0;
+        }
+        
+    }
+
     public void FindRelativePosForHingeJoint(Vector3 blockPosition = default(Vector3))
     {
         //Update the block position on this line in a proper way to Find Relative position for our blockPosition
         if(IsFlying)
             blockPosition = BlockCreator.Instance.GetRelativeBlock(transform.position.z).position;
-        hJoint.anchor = new Vector3(blockPosition.x, (blockPosition.y / 2) - transform.position.y, blockPosition.z - transform.position.z);
-        lRenderer.SetPosition(1, hJoint.anchor);
-        lRenderer.enabled = true;
-        Debug.Log("Anchor: " + hJoint.anchor);
+        transform.eulerAngles = Vector3.zero;
+        _hJoint.anchor = new Vector3(blockPosition.x, (blockPosition.y / 2) - transform.position.y, blockPosition.z - transform.position.z);
+        _lRenderer.SetPosition(1, _hJoint.anchor);
+        _lRenderer.enabled = true;
+        Debug.Log("Anchor: " + _hJoint.anchor);
     }
 
     public void BreakHingeJoint()
     {
-        Destroy(hJoint);
-        lRenderer.enabled = false;
+        Destroy(_hJoint);
+        _lRenderer.enabled = false;
+        _isConnected = false;
+        _timer = 0.01f;
     }
 
     public void PointerDown()
@@ -67,9 +92,11 @@ public class PlayerController : MonoBehaviour {
         //Debug.Log("Pointer Down");
         //This function works once when player holds on the screen
         //FILL the behaviour here when player holds on the screen. You may or not call other functions you create here or just fill it here
-        if (hJoint == null)
-            hJoint = gameObject.AddComponent<HingeJoint>();
+        if (_hJoint == null)
+            _hJoint = gameObject.AddComponent<HingeJoint>();
         FindRelativePosForHingeJoint();
+        //_playerRigidbody.velocity = Vector3.forward * _forceAmount * Time.deltaTime;
+        _isConnected = true;
     }
 
     public void PointerUp()

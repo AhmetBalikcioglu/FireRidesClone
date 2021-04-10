@@ -53,7 +53,7 @@ public class BlockCreator : Singleton<BlockCreator>
         Transform relativeBlock = null;
         for (int i = 0; i < blockPool.Count; i += 2)
         {
-            if (blockPool[i].transform.position.z <= playerPosZ + 4 && blockPool[i].transform.position.z >= playerPosZ + 3)
+            if (blockPool[i].transform.position.z <= playerPosZ + 4 && blockPool[i].transform.position.z > playerPosZ + 3)
                 relativeBlock = blockPool[i].transform;
         }
         Debug.Log("RelativeBlock: " + relativeBlock.position);
@@ -63,7 +63,7 @@ public class BlockCreator : Singleton<BlockCreator>
     public void UpdateBlockPosition()
     {
         //Block Pool has been created. Find a proper way to make infite map when it is needed
-        if (_lastBlockZPos - CharacterManager.Instance.Player.transform.position.z >= 15)
+        if (_lastBlockZPos - CharacterManager.Instance.Player.transform.position.z >= 25)
             return;
         _lastHeightUpperBlock = Random.Range(_lastHeightUpperBlock - Difficulty, _lastHeightUpperBlock + Difficulty);
         float randomHeightLowerBlock = Random.Range(_lastHeightUpperBlock - 20, _lastHeightUpperBlock - 20 + Difficulty * 3);
