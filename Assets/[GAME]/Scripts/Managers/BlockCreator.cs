@@ -7,9 +7,11 @@ using UnityEngine;
 //Update Block Position section to make infinite map.
 public class BlockCreator : Singleton<BlockCreator> 
 {
-    [SerializeField] private GameObject[] blockPrefabs;
-    [SerializeField] private GameObject pointPrefab;
-    [SerializeField] private int blockCount;
+    [SerializeField] private GameObject[] _blockPrefabs;
+    [SerializeField] private GameObject _pointPrefab;
+    [SerializeField] private int _blockCount;
+    [SerializeField] private float _blockDifference;
+    public float _blockLength;
 
     private List<GameObject> blockPool = new List<GameObject>();
     private float _lastHeightUpperBlock = 10;
@@ -25,23 +27,23 @@ public class BlockCreator : Singleton<BlockCreator>
 
     public void InstantiateBlocks()
     {
-        for (int i = 0; i < blockCount; i++)
+        for (int i = 0; i < _blockCount; i++)
         {
             _lastHeightUpperBlock = Random.Range(_lastHeightUpperBlock - Difficulty, _lastHeightUpperBlock + Difficulty);
-            float randomHeightLowerBlock = Random.Range(_lastHeightUpperBlock - 20, _lastHeightUpperBlock - 20 + Difficulty * 3);
-            GameObject newUpperBlock = Instantiate(blockPrefabs[i % blockPrefabs.Length], new Vector3(0, _lastHeightUpperBlock, i + 1), Quaternion.identity);
-            GameObject newLowerBlock = Instantiate(blockPrefabs[i % blockPrefabs.Length], new Vector3(0, randomHeightLowerBlock, i + 1), Quaternion.identity);
+            float randomHeightLowerBlock = Random.Range(_lastHeightUpperBlock - _blockDifference, _lastHeightUpperBlock - _blockDifference + Difficulty * 2);
+            GameObject newUpperBlock = Instantiate(_blockPrefabs[i % _blockPrefabs.Length], new Vector3(0, _lastHeightUpperBlock, i + 1), Quaternion.identity);
+            GameObject newLowerBlock = Instantiate(_blockPrefabs[i % _blockPrefabs.Length], new Vector3(0, randomHeightLowerBlock, i + 1), Quaternion.identity);
             blockPool.Add(newUpperBlock);
             blockPool.Add(newLowerBlock);
             if (i % 15 == 0 && i != 0)
             {
-                Instantiate(pointPrefab, new Vector3(0, (_lastHeightUpperBlock + randomHeightLowerBlock) / 2f, i + 1), Quaternion.Euler(90, 0, 0));
+                Instantiate(_pointPrefab, new Vector3(0, (_lastHeightUpperBlock + randomHeightLowerBlock) / 2f, i + 1), Quaternion.Euler(90, 0, 0));
             }
             _lastBlockZPos++;
         }
     }
 
-    void Update () 
+    void Update ()
     {
         if(GameManager.Instance.isGameStarted)
             UpdateBlockPosition();
@@ -66,15 +68,15 @@ public class BlockCreator : Singleton<BlockCreator>
         if (_lastBlockZPos - CharacterManager.Instance.Player.transform.position.z >= 25)
             return;
         _lastHeightUpperBlock = Random.Range(_lastHeightUpperBlock - Difficulty, _lastHeightUpperBlock + Difficulty);
-        float randomHeightLowerBlock = Random.Range(_lastHeightUpperBlock - 20, _lastHeightUpperBlock - 20 + Difficulty * 3);
+        float randomHeightLowerBlock = Random.Range(_lastHeightUpperBlock - _blockDifference, _lastHeightUpperBlock - _blockDifference + Difficulty * 2);
         blockPool[_lastChangedBlockIndex++].transform.position = new Vector3(0, _lastHeightUpperBlock, _lastBlockZPos + 1);
         blockPool[_lastChangedBlockIndex++].transform.position = new Vector3(0, randomHeightLowerBlock, _lastBlockZPos + 1);
         if (_lastBlockZPos % 15 == 0)
         {
-            Instantiate(pointPrefab, new Vector3(0, (_lastHeightUpperBlock + randomHeightLowerBlock) / 2f, _lastBlockZPos + 1), Quaternion.Euler(90, 0, 0));
+            Instantiate(_pointPrefab, new Vector3(0, (_lastHeightUpperBlock + randomHeightLowerBlock) / 2f, _lastBlockZPos + 1), Quaternion.Euler(90, 0, 0));
         }
         _lastBlockZPos++;
-        if (_lastChangedBlockIndex >= blockCount * 2)
+        if (_lastChangedBlockIndex >= _blockCount * 2)
             _lastChangedBlockIndex = 0;
     }
 }
